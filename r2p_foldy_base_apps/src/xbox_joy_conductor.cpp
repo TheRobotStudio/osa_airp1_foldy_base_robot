@@ -44,7 +44,7 @@
 //other
 //#include <stdio.h>
 //ROS packages include 
-#include "bibot_apps/robotDefines.h"
+#include "r2p_foldy_base_apps/robotDefines.h"
 
 /*** Defines ***/
 #define LOOP_RATE	HEART_BEAT //50
