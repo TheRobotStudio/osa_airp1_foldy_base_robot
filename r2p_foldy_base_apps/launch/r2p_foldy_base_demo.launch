@@ -1,0 +1,5 @@
+<launch>
+	<include file="$(find r2p_foldy_base_bringup)/launch/r2p_foldy_base_bringup.launch">
+		<arg name="can_ns" value="foldy_base" />
+	</include>
+</launch>
