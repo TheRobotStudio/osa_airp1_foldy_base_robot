@@ -37,8 +37,8 @@
 #include <osa_msgs/MotorDataMultiArray.h>
 #include <std_msgs/Bool.h>
 //ROS services
-#include "bibot_apps/switchNode.h"
-#include "bibot_apps/getSlaveCmdArray.h"
+#include "r2p_foldy_base_apps/switchNode.h"
+#include "r2p_foldy_base_apps/getSlaveCmdArray.h"
 //other
 #include <stdio.h>
 //ROS packages include 
@@ -65,14 +65,14 @@ void joy_cb(const sensor_msgs::JoyConstPtr& joy)
 }
 
 /*** Services ***/
-bool switchNode(bibot_apps::switchNode::Request  &req, bibot_apps::switchNode::Response &res)
+bool switchNode(r2p_foldy_base_apps::switchNode::Request  &req, r2p_foldy_base_apps::switchNode::Response &res)
 {
 	//ROS_INFO("switch node");
 	switch_node = req.state;
 	return true;
 }
 
-bool getMotorCmd_ma(bibot_apps::getSlaveCmdArray::Request  &req, bibot_apps::getSlaveCmdArray::Response &res)
+bool getMotorCmd_ma(r2p_foldy_base_apps::getSlaveCmdArray::Request  &req, r2p_foldy_base_apps::getSlaveCmdArray::Response &res)
 {
 	//ROS_INFO("cmd srv");
 
