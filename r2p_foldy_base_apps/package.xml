@@ -46,6 +46,7 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>osa_msgs</build_depend>
+  <build_depend>osa_common</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>message_generation</build_depend>
 
@@ -56,6 +57,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>osa_msgs</run_depend>
+  <run_depend>osa_common</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>message_generation</run_depend>
   

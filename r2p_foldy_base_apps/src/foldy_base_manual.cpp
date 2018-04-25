@@ -41,21 +41,20 @@
 #include "r2p_foldy_base_apps/getSlaveCmdArray.h"
 //other
 #include <stdio.h>
-//ROS packages include 
-#include "r2p_foldy_base_apps/robotDefines.h"
+
+#include "r2p_foldy_base_apps/kiwi_drive.h"
+#include "osa_common/enums.h"
 
 /*** Defines ***/
-#define LOOP_RATE				HEART_BEAT
-#define DOF_DIM 				2//NUMBER_MOTORS_ARM
+//#define LOOP_RATE				50 //HEART_BEAT
+
+using namespace r2p_foldy_base_apps;
 
 /*** Variables ***/
 bool switch_node = false; //disable by default
-osa_msgs::MotorCmdMultiArray motorCmd_ma;
+osa_msgs::MotorCmdMultiArray motor_cmd_ma;
 sensor_msgs::Joy xboxJoy;
 bool joy_arrived = false;
-
-//ROS publisher
-//ros::Publisher pub_motorBaseCmdMultiArray;
 
 /*** Callback functions ***/
 void joy_cb(const sensor_msgs::JoyConstPtr& joy)
@@ -65,21 +64,21 @@ void joy_cb(const sensor_msgs::JoyConstPtr& joy)
 }
 
 /*** Services ***/
-bool switchNode(r2p_foldy_base_apps::switchNode::Request  &req, r2p_foldy_base_apps::switchNode::Response &res)
+bool switchNodeService(r2p_foldy_base_apps::switchNode::Request  &req, r2p_foldy_base_apps::switchNode::Response &res)
 {
-	//ROS_INFO("switch node");
+	ROS_DEBUG("switch node");
 	switch_node = req.state;
 	return true;
 }
 
-bool getMotorCmd_ma(r2p_foldy_base_apps::getSlaveCmdArray::Request  &req, r2p_foldy_base_apps::getSlaveCmdArray::Response &res)
+bool getMotorCmdArray(r2p_foldy_base_apps::getSlaveCmdArray::Request  &req, r2p_foldy_base_apps::getSlaveCmdArray::Response &res)
 {
 	//ROS_INFO("cmd srv");
 
 	//send the motorCmdSet set by the callback function motorDataSet_cb
 	if(switch_node)
 	{
-		res.motorCmdMultiArray = motorCmd_ma;
+		res.motorCmdMultiArray = motor_cmd_ma;
 		return true;
 	}
 	else
@@ -94,97 +93,116 @@ int main (int argc, char** argv)
 	// Initialize ROS
 	ros::init (argc, argv, "osa_mobileBaseManual_server_node");
 	ros::NodeHandle nh;
-	ros::Rate r(LOOP_RATE);
+	//ros::Rate r(LOOP_RATE);
+
+	float wheel_radius = 0;
+	float base_radius = 0;
+	int maximum_velocity_rpm = 0;
+
+	//Grab parameters
+	try
+	{
+		nh.param("/holonomic_base/wheel_radius", wheel_radius, (float)0.04);
+		nh.param("/holonomic_base/base_radius", base_radius, (float)0.2);
+		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)6000);
+
+		ROS_INFO("Grab the Foldy Base parameters: [%f,%f,%d]", wheel_radius, base_radius, maximum_velocity_rpm);
+	}
+	catch(ros::InvalidNameException const &e)
+	{
+		ROS_ERROR(e.what());
+		ROS_ERROR("Parameter of Foldy Base didn't load correctly!");
+		ROS_ERROR("Please check the name and try again.");
+
+		throw e;
+	}
+
+	//Create the Kiwi Drive with the parameters provided from the Parameter Server
+	KiwiDrive *kiwi_drive = new KiwiDrive(wheel_radius, base_radius);
 
 	//Subscribers
 	ros::Subscriber sub_joy = nh.subscribe ("/joy", 10, joy_cb);
 
-	//Publishers	
-	//pub_motorBaseCmdMultiArray = nh.advertise<osa_msgs::MotorCmdMultiArray>("/set_base_cmd", 100, true);
-
 	//Services
-	ros::ServiceServer srv_switchNode = nh.advertiseService("switch_mobile_base_manual_srv", switchNode);
-	ros::ServiceServer srv_getMotorCmd_ma = nh.advertiseService("get_mobile_base_manual_cmd_srv", getMotorCmd_ma);
+	ros::ServiceServer srv_switch_node = nh.advertiseService("switch_foldy_base_manual_srv", switchNodeService);
+	ros::ServiceServer srv_get_motor_cmd_ma = nh.advertiseService("get_foldy_base_manual_cmd_srv", getMotorCmdArray);
 
 	//create the commands multi array
-	motorCmd_ma.layout.dim.push_back(std_msgs::MultiArrayDimension());
-	motorCmd_ma.layout.dim[0].size = NUMBER_MOTORS_BASE;
-	motorCmd_ma.layout.dim[0].stride = NUMBER_MOTORS_BASE;
-	motorCmd_ma.layout.dim[0].label = "motors";
-	motorCmd_ma.layout.data_offset = 0;
-	motorCmd_ma.motor_cmd.clear();
-	motorCmd_ma.motor_cmd.resize(NUMBER_MOTORS_BASE);
+	motor_cmd_ma.layout.dim.push_back(std_msgs::MultiArrayDimension());
+	motor_cmd_ma.layout.dim[0].size = KiwiDrive::NUMBER_OF_WHEELS;
+	motor_cmd_ma.layout.dim[0].stride = KiwiDrive::NUMBER_OF_WHEELS;
+	motor_cmd_ma.layout.dim[0].label = "motors";
+	motor_cmd_ma.layout.data_offset = 0;
+	motor_cmd_ma.motor_cmd.clear();
+	motor_cmd_ma.motor_cmd.resize(KiwiDrive::NUMBER_OF_WHEELS);
 
-	for(int i=0; i<NUMBER_MOTORS_BASE; i++)
+	for(int i=0; i<KiwiDrive::NUMBER_OF_WHEELS; i++)
 	{
-		//motorCmd_ma.motor_cmd[i].slaveBoardID = BIBOT_BASE_SLAVEBOARD_ID;
-		motorCmd_ma.motor_cmd[i].node_id = i+1;
-		motorCmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
-		motorCmd_ma.motor_cmd[i].value = 0;
+		motor_cmd_ma.motor_cmd[i].node_id = i+1;
+		motor_cmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
+		motor_cmd_ma.motor_cmd[i].value = 0;
 	}
 
 	float baseLR_f = 0; //left right
 	float baseUD_f = 0; //up down
+
 	float leftWheel_f = 0;
 	float rightWheel_f = 0;
 	int leftWheel_i = 0;
 	int rightWheel_i = 0;
 
-	while(ros::ok())
-	{	/*	
-		for(int i=0; i<NUMBER_MOTORS_BASE; i++)
-		{
-			motorCmd_ma.motor_cmd[i].node_id = i+1;
-			motorCmd_ma.motor_cmd[i].mode = NO_MODE; //VELOCITY_MODE;
-			motorCmd_ma.motor_cmd[i].value = 0;
-		}*/
+	switch_node = true; //switch on by default
 
+	float joy_h = 0; //x horizontal v(x,y)
+	float joy_v = 0; //y vertical v(x,y)
+	float joy_r = 0; //w rotation
+
+	while(ros::ok())
+	{
 		ros::spinOnce();
 
 		if(switch_node)
 		{
-			//ROS_INFO("srv ON");
-
 			if(joy_arrived)
 			{
 				if(!((xboxJoy.axes[3]<0.1)&&(xboxJoy.axes[3]>-0.1)&&(xboxJoy.axes[4]<0.1)&&(xboxJoy.axes[4]>-0.1)))
 				{
-					baseLR_f = xboxJoy.axes[3]/2; //left right
-					baseUD_f = xboxJoy.axes[4]; //up down
-								
-					leftWheel_f = -(baseLR_f - baseUD_f)*4000;
-					rightWheel_f = (baseLR_f + baseUD_f)*4000;
 
-					leftWheel_i = (int)leftWheel_f;
-					rightWheel_i = (int)rightWheel_f;
+					joy_h = xboxJoy.axes[3]; //left right
+					joy_v = xboxJoy.axes[4]; //up down
 				}
 				else //add a deadband of +/- 0.1 on both axis
 				{
-					leftWheel_i = 0;
-					rightWheel_i = 0;
+					joy_h = 0;
+					joy_v = 0;
 				}
 
-				//Apply values
-				motorCmd_ma.motor_cmd[0].command = SET_TARGET_VELOCITY;
-				motorCmd_ma.motor_cmd[1].command = SET_TARGET_VELOCITY;
-				motorCmd_ma.motor_cmd[0].value =  leftWheel_i;
-				motorCmd_ma.motor_cmd[1].value = rightWheel_i;
-			}
-			else
-			{
-				//ROS_INFO("no joy");
-				//STOP base motors	
-				//baseCmd_ma.motor_cmd[0].mode = VELOCITY_MODE;
-				//baseCmd_ma.motor_cmd[1].mode = VELOCITY_MODE;
-				//baseCmd_ma.motor_cmd[0].value = 0;
-				//baseCmd_ma.motor_cmd[1].value = 0;
-			}
+				if(!((xboxJoy.axes[0]<0.1)&&(xboxJoy.axes[0]>-0.1)))
+				{
+					joy_r = xboxJoy.axes[0]; //left right
+				}
+				else //add a deadband of +/- 0.1 on horizontal axis
+				{
+					joy_r = 0;
+				}
 
-			//joy_arrived = false;
+				//compute motor velocities
+				kiwi_drive->computeWheelAngularVelocity(joy_h, joy_v, joy_r, maximum_velocity_rpm);
+
+				//Apply values
+				for(int i=0; i<KiwiDrive::NUMBER_OF_WHEELS; i++)
+				{
+					motor_cmd_ma.motor_cmd[i].node_id = i+1;
+					motor_cmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
+					motor_cmd_ma.motor_cmd[i].value = kiwi_drive->getWheelAngularVelocity()(i);
+				}
+
+				//print
+				ROS_INFO("w(%d, %d, %d)", motor_cmd_ma.motor_cmd[0].value, motor_cmd_ma.motor_cmd[1].value, motor_cmd_ma.motor_cmd[2].value);
+
+				joy_arrived = false;
+			}
 		}//if(switch_node)
-		//else ROS_INFO("srv OFF");
- 
-		//r.sleep();
 	}
 
 	return 0;

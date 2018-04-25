@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   osa_msgs
+  osa_common
   visualization_msgs
   sensor_msgs
   message_generation
@@ -43,8 +44,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  getAllCurrentCmd.srv
-  getHeadPositionCmd.srv
   getSlaveCmdArray.srv
   getSlaveCurrentCmd.srv
   getSlaveLockCmd.srv
@@ -76,7 +75,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES osa_control
- CATKIN_DEPENDS rosbag roscpp roslib std_msgs tf osa_msgs visualization_msgs
+ CATKIN_DEPENDS rosbag roscpp roslib std_msgs tf osa_msgs osa_common visualization_msgs
  DEPENDS Eigen
 )
 
@@ -93,21 +92,23 @@ include_directories(
 include_directories(/usr/include/eigen3)
 
 ## Declare a cpp library
-# add_library(osa_control
-#   src/${PROJECT_NAME}/osa_control.cpp
-# )
+#add_library(osa_r2p_foldy_base_apps
+#  src/can_layer.cpp
+#  src/epos_controller.cpp
+#)
 
 ## Declare a cpp executable
-add_executable(osa_r2p_xbox_joy_conductor src/xbox_joy_conductor.cpp)
-add_executable(osa_r2p_foldy_base_manual src/foldy_base_manual.cpp) 
+add_executable(osa_r2p_foldy_joy_conductor src/foldy_joy_conductor.cpp )
+add_executable(osa_r2p_foldy_base_manual src/foldy_base_manual.cpp src/kiwi_drive.cpp) 
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(osa_control_node osa_control_generate_messages_cpp) 			#TODO
-# add_dependencies(example4 osa_control_gencfg)		#TODO
+add_dependencies(osa_r2p_foldy_joy_conductor osa_control_generate_messages_cpp osa_common)
+add_dependencies(osa_r2p_foldy_base_manual osa_control_generate_messages_cpp osa_common)
+# add_dependencies(example4 osa_control_gencfg)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(osa_r2p_xbox_joy_conductor ${catkin_LIBRARIES} ${Eigen_INCLUDE_DIRS})
+target_link_libraries(osa_r2p_foldy_joy_conductor ${catkin_LIBRARIES} ${Eigen_INCLUDE_DIRS})
 target_link_libraries(osa_r2p_foldy_base_manual ${catkin_LIBRARIES} ${Eigen_INCLUDE_DIRS})
 
 #############

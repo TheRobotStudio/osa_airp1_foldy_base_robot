@@ -3,8 +3,6 @@
 #
 # Parameters:
 #
-# dofX has CAN node ID X
-#
 # type:
 #    TENDON
 #    CLASSICAL
@@ -54,7 +52,7 @@ robot:
   heartbeat: 50
 
 # Base
-dof1: {name: 'wheel/right', type: 'WHEEL', node_id: 3, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
-dof2: {name: 'wheel/left', type: 'WHEEL', node_id: 2, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
-dof3: {name: 'wheel/middle', type: 'WHEEL', node_id: 1, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
+dof1: {name: 'wheel/left', type: 'WHEEL', node_id: 1, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
+dof2: {name: 'wheel/right', type: 'WHEEL', node_id: 2, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
+dof3: {name: 'wheel/middle', type: 'WHEEL', node_id: 3, controller: 'EPOS2', motor: 'EC32F_12', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
 
