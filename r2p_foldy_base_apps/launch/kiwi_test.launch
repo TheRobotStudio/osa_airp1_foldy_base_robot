@@ -1,9 +1,0 @@
-<launch>
-
-	<!-- Load parameters -->
-	<rosparam file="$(find r2p_foldy_base_description)/config/r2p_foldy_base_geometry.yaml" command="load"/>
-	
-	<node name="osa_kiwi" pkg="r2p_foldy_base_apps" type="osa_r2p_foldy_base_manual" output="screen" respawn="false" launch-prefix="xterm -e"/>
-	<node name="osa_joy" pkg="r2p_foldy_base_apps" type="osa_r2p_foldy_joy_conductor" output="screen" respawn="false"/>
-
-</launch>

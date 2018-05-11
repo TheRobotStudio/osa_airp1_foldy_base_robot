@@ -104,7 +104,7 @@ int main (int argc, char** argv)
 	{
 		nh.param("/holonomic_base/wheel_radius", wheel_radius, (float)0.04);
 		nh.param("/holonomic_base/base_radius", base_radius, (float)0.2);
-		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)6000);
+		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)100);
 
 		ROS_INFO("Grab the Foldy Base parameters: [%f,%f,%d]", wheel_radius, base_radius, maximum_velocity_rpm);
 	}
@@ -168,8 +168,8 @@ int main (int argc, char** argv)
 				if(!((xboxJoy.axes[3]<0.1)&&(xboxJoy.axes[3]>-0.1)&&(xboxJoy.axes[4]<0.1)&&(xboxJoy.axes[4]>-0.1)))
 				{
 
-					joy_h = xboxJoy.axes[3]; //left right
-					joy_v = xboxJoy.axes[4]; //up down
+					joy_h = -1*xboxJoy.axes[3]; //left right
+					joy_v = -1*xboxJoy.axes[4]; //up down
 				}
 				else //add a deadband of +/- 0.1 on both axis
 				{
@@ -179,7 +179,7 @@ int main (int argc, char** argv)
 
 				if(!((xboxJoy.axes[0]<0.1)&&(xboxJoy.axes[0]>-0.1)))
 				{
-					joy_r = xboxJoy.axes[0]; //left right
+					joy_r = -1*xboxJoy.axes[0]; //left right
 				}
 				else //add a deadband of +/- 0.1 on horizontal axis
 				{
@@ -194,8 +194,11 @@ int main (int argc, char** argv)
 				{
 					motor_cmd_ma.motor_cmd[i].node_id = i+1;
 					motor_cmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
-					motor_cmd_ma.motor_cmd[i].value = kiwi_drive->getWheelAngularVelocity()(i);
+					//motor_cmd_ma.motor_cmd[i].value = kiwi_drive->getWheelAngularVelocity()(i);
 				}
+				motor_cmd_ma.motor_cmd[0].value = kiwi_drive->getWheelAngularVelocity()(1);
+				motor_cmd_ma.motor_cmd[1].value = kiwi_drive->getWheelAngularVelocity()(2);
+				motor_cmd_ma.motor_cmd[2].value = kiwi_drive->getWheelAngularVelocity()(0);
 
 				//print
 				ROS_INFO("w(%d, %d, %d)", motor_cmd_ma.motor_cmd[0].value, motor_cmd_ma.motor_cmd[1].value, motor_cmd_ma.motor_cmd[2].value);

@@ -3,5 +3,5 @@
 		<arg name="can_ns" value="foldy_base" />
 	</include>
 	
-	<include file="$(find r2p_foldy_base_apps)/launch/kiwi_test.launch">
+	<include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/>
 </launch>
