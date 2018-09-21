@@ -1,7 +1,8 @@
 <launch>
 
-	<node name="osa_xboxjoy_node" pkg="joy" type="joy_node" output="screen" respawn="true"/>
-
+	<node name="osa_xboxjoy_node" pkg="joy" type="joy_node" output="screen" respawn="true">
+	    <param name="dev" type="string" value="/dev/input/js0" />
+	</node>
 	<!-- Load parameters -->
 	<rosparam file="$(find r2p_foldy_base_description)/config/r2p_foldy_base_geometry.yaml" command="load"/>
 	
