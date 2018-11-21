@@ -196,9 +196,14 @@ int main (int argc, char** argv)
 					motor_cmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
 					//motor_cmd_ma.motor_cmd[i].value = kiwi_drive->getWheelAngularVelocity()(i);
 				}
-				motor_cmd_ma.motor_cmd[0].value = kiwi_drive->getWheelAngularVelocity()(1);
-				motor_cmd_ma.motor_cmd[1].value = kiwi_drive->getWheelAngularVelocity()(2);
-				motor_cmd_ma.motor_cmd[2].value = kiwi_drive->getWheelAngularVelocity()(0);
+
+				//factor to increase speed
+				//calculate distance of joystick to the center
+				float power_factor = (joy_h*joy_h + joy_v*joy_v)*5 + joy_r*joy_r*20;
+
+				motor_cmd_ma.motor_cmd[0].value = power_factor*kiwi_drive->getWheelAngularVelocity()(1);
+				motor_cmd_ma.motor_cmd[1].value = power_factor*kiwi_drive->getWheelAngularVelocity()(2);
+				motor_cmd_ma.motor_cmd[2].value = power_factor*kiwi_drive->getWheelAngularVelocity()(0);
 
 				//print
 				ROS_INFO("w(%d, %d, %d)", motor_cmd_ma.motor_cmd[0].value, motor_cmd_ma.motor_cmd[1].value, motor_cmd_ma.motor_cmd[2].value);
