@@ -100,6 +100,8 @@ include_directories(/usr/include/eigen3)
 ## Declare a cpp executable
 add_executable(osa_r2p_foldy_joy_conductor src/foldy_joy_conductor.cpp )
 add_executable(osa_r2p_foldy_base_manual src/foldy_base_manual.cpp src/kiwi_drive.cpp) 
+add_executable(osa_r2p_odometry src/odometry.cpp)
+add_executable(osa_r2p_base_controller src/base_controller.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -110,6 +112,8 @@ add_dependencies(osa_r2p_foldy_base_manual osa_control_generate_messages_cpp osa
 ## Specify libraries to link a library or executable target against
 target_link_libraries(osa_r2p_foldy_joy_conductor ${catkin_LIBRARIES} ${Eigen_INCLUDE_DIRS})
 target_link_libraries(osa_r2p_foldy_base_manual ${catkin_LIBRARIES} ${Eigen_INCLUDE_DIRS})
+target_link_libraries(osa_r2p_odometry ${catkin_LIBRARIES})
+target_link_libraries(osa_r2p_base_controller ${catkin_LIBRARIES})
 
 #############
 ## Install ##
