@@ -83,14 +83,14 @@ int main (int argc, char** argv)
 	double vth = 0.0;
 
 	// motor position
-	double curr_mot_enc_pos[3] = {0};
-	double prev_mot_enc_pos[3] = {0};
-	double diff_mot_enc_pos[3] = {0};
+	int curr_mot_enc_pos[3] = {0};
+	int prev_mot_enc_pos[3] = {0};
+	int diff_mot_enc_pos[3] = {0};
 
 	double wheel_lin_vel[3] = {0}; //V1, V2, V3
 
 	const double gear_ratio = 28/1;
-	const double enc_tic_per_motor_turn = 128;
+	const double enc_tic_per_motor_turn = 1000;
 	const double enc_tic_per_shaft_turn = enc_tic_per_motor_turn*gear_ratio;
 	const double robot_base_radius = 0.27; //in meters
 	const double swedish_wheel_radius = 0.06;
@@ -108,7 +108,7 @@ int main (int argc, char** argv)
 	tf::TransformBroadcaster broadcaster;
 	ros::Rate loop_rate(20);
 
-	const double degree = M_PI/180;
+	//const double degree = M_PI/180;
 
 	// message declarations
 	geometry_msgs::TransformStamped odom_trans;
@@ -138,6 +138,8 @@ int main (int argc, char** argv)
 			curr_time = ros::Time::now();
 			dt = (curr_time - prev_time).toSec();
 
+			//ROS_INFO("dt=%f", dt);
+			
 			// encoder position
 			for(int i=0; i<3; i++)
 			{
@@ -148,14 +150,22 @@ int main (int argc, char** argv)
 				// v = d/t so d = theta*r = 2*Pi*r*diff_enc/enc_tic_per_shaft_turn
 				// then just divide by dt to get the linear velocity of the wheel
 				wheel_lin_vel[i] = (2*M_PI*swedish_wheel_radius*diff_mot_enc_pos[i])/(enc_tic_per_shaft_turn*dt);
+				
+				//ROS_INFO("Motor %d: enc=%d, diff_enc=%d, lin_vel=%f", i, curr_mot_enc_pos[i], diff_mot_enc_pos[i], curr_mot_enc_pos[2]);
 			}
 
-			//calculation of theta_dot which is the variable vth here
-			vth = (wheel_lin_vel[0]+wheel_lin_vel[1]+wheel_lin_vel[2])/(3*robot_base_radius);
-			delta_th = vth*dt;
+			//ROS_INFO("enc1=%d, enc2=%d, enc3=%d", curr_mot_enc_pos[0], curr_mot_enc_pos[1], curr_mot_enc_pos[2]);
 
-			vx = (2/3)*(-cos(delta_th) + cos(M_PI/3-delta_th) + cos(M_PI/3+delta_th));
-			vy = (2/3)*(-sin(delta_th) - sin(M_PI/3-delta_th) + sin(M_PI/3+delta_th));
+			//calculation of theta_dot which is the variable vth here
+			vth = -(wheel_lin_vel[0]+wheel_lin_vel[1]+wheel_lin_vel[2])/(3*robot_base_radius);
+			delta_th = vth*dt/4; //don't understand why a factor 4 is needed to achieve correct angle measurement
+
+			//ROS_INFO("delta_th=%f", delta_th);
+
+			vx = -2*(-cos(delta_th)*wheel_lin_vel[0] + cos(M_PI/3-delta_th)*wheel_lin_vel[1]  + cos(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
+			//ROS_INFO("vx1=%f", vx);
+			vy = 2*(-sin(delta_th)*wheel_lin_vel[0] - sin(M_PI/3-delta_th)*wheel_lin_vel[1]  + sin(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
+			ROS_INFO("vy=%f", vy);
 
 			delta_x = vx*dt;
 			delta_y = vy*dt;
@@ -163,8 +173,12 @@ int main (int argc, char** argv)
 			//accumulated position and angle, this will drift over time with the accumulated errors
 			x += delta_x;
 			y += delta_y;
-			th += delta_th;
+			th += delta_th; 
 
+			ROS_INFO("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
+			//ROS_INFO("vx=%f, delta_x=%f, x=%f", vx, delta_x, x);
+			//ROS_INFO("th=%f", th);
+			
 			geometry_msgs::Quaternion odom_quat;
 			odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0,0,th);
 
