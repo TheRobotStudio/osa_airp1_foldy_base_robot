@@ -90,7 +90,7 @@ int main (int argc, char** argv)
 	double wheel_lin_vel[3] = {0}; //V1, V2, V3
 
 	const double gear_ratio = 28/1;
-	const double enc_tic_per_motor_turn = 1000;
+	const double enc_tic_per_motor_turn = 1000*4; //division by 4 for the quadrate encoder
 	const double enc_tic_per_shaft_turn = enc_tic_per_motor_turn*gear_ratio;
 	const double robot_base_radius = 0.27; //in meters
 	const double swedish_wheel_radius = 0.06;
@@ -160,26 +160,27 @@ int main (int argc, char** argv)
 
 			//calculation of theta_dot which is the variable vth here
 			vth = -(wheel_lin_vel[0]+wheel_lin_vel[1]+wheel_lin_vel[2])/(3*robot_base_radius);
-			delta_th = vth*dt/4; //don't understand why a factor 4 is needed to achieve correct angle measurement, maybe because of quadrature encoder ?
+			delta_th = vth*dt;// /4 //don't understand why a factor 4 is needed to achieve correct angle measurement, maybe because of quadrature encoder ?
 
 			//ROS_INFO("delta_th=%f", delta_th);
 
 			vx = -2*(-cos(delta_th)*wheel_lin_vel[0] + cos(M_PI/3-delta_th)*wheel_lin_vel[1]  + cos(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
 			//ROS_INFO("vx1=%f", vx);
 			vy = 2*(-sin(delta_th)*wheel_lin_vel[0] - sin(M_PI/3-delta_th)*wheel_lin_vel[1]  + sin(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
-			ROS_INFO("vy=%f", vy);
+			//ROS_INFO("vy=%f", vy);
 
 			delta_x = vx*dt;
 			delta_y = vy*dt;
 
 			//accumulated position rotated by delta_th and final angle, this will drift over time with the accumulated errors
-			x += cos(delta_th)*delta_x - sin(delta_th)*delta_y; //delta_x;
-			y += sin(delta_th)*delta_x + cos(delta_th)*delta_y; //delta_y;
+			//Not sure why I need to remove an angle of Pi/6, probably because of the arangement of the wheels 120 degrees appart, or 2Pi/3
+			x += cos(th-M_PI/6)*delta_x - sin(th-M_PI/6)*delta_y; //delta_x;
+			y += sin(th-M_PI/6)*delta_x + cos(th-M_PI/6)*delta_y; //delta_y;
 			th += delta_th;
 
-			ROS_INFO("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
+			//ROS_INFO("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
 			//ROS_INFO("vx=%f, delta_x=%f, x=%f", vx, delta_x, x);
-			//ROS_INFO("th=%f", th);
+			ROS_INFO("dx=%f", delta_x);
 			
 			geometry_msgs::Quaternion odom_quat;
 			odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0,0,th);
