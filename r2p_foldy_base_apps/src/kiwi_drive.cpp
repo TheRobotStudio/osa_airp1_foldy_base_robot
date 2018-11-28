@@ -48,7 +48,7 @@ wheel_radius_(wheel_radius),
 mobile_base_radius_(mobile_base_radius),
 unit_direction_mat_(), //(3, 2)
 velocity_command_vec_(),
-angular_velocity_command_vec_(),
+angular_velocity_command_(),
 wheel_linear_velocity_vec_(),
 wheel_angular_velocity_vec_()
 {
@@ -76,10 +76,10 @@ void KiwiDrive::computeWheelAngularVelocity(const float joy_horizontal, const fl
 	velocity_command_vec_(1) = joy_vertical;
 	velocity_command_vec_ *= maximal_velocity;
 	//same for the angular velocity
-	angular_velocity_command_vec_ = joy_rotation*maximal_velocity;
+	angular_velocity_command_ = joy_rotation*maximal_velocity/2; //robot turns too fast, so /2 to have a slower speed
 
-	Eigen::Vector3f identity(1,1,1);
+	const Eigen::Vector3f identity(1,1,1);
 
 	//W = (F*v + b*w*I)/r
-	wheel_angular_velocity_vec_ = (unit_direction_mat_*velocity_command_vec_ + mobile_base_radius_*angular_velocity_command_vec_*identity)/wheel_radius_;
+	wheel_angular_velocity_vec_ = (unit_direction_mat_*velocity_command_vec_ + mobile_base_radius_*angular_velocity_command_*identity)/wheel_radius_;
 }

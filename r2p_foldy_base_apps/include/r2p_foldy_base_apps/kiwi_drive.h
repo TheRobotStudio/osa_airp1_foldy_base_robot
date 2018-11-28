@@ -69,7 +69,7 @@ private:
 	float mobile_base_radius_; /**< in meter */
 	Eigen::Matrix<float, 3, 2> unit_direction_mat_; /**< made of 3 vectors: F0, F1, F2, one for each wheel. */
 	Eigen::Vector2f velocity_command_vec_; /**< v(x,y) expressed in the coordinates of the mobile base center in m/s. */
-	float angular_velocity_command_vec_; /**< w in rad/S, from the mobile base center */
+	float angular_velocity_command_; /**< w in rad/S, from the mobile base center */
 	Eigen::Vector3f wheel_linear_velocity_vec_; /**< v0 v1 v2 in m/s */
 	Eigen::Vector3f wheel_angular_velocity_vec_; /**< w0 w1 w2 in rad/s */
 

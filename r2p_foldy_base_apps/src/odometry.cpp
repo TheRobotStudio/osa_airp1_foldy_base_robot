@@ -125,6 +125,8 @@ int main (int argc, char** argv)
 			prev_time = ros::Time::now();
 
 			for(int i=0; i<3; i++) prev_mot_enc_pos[i] = motor_data_array.motor_data.at(i).position; //fill the prev values
+
+			motor_data_array_arrived = false;
 		}
 	}
 
@@ -158,7 +160,7 @@ int main (int argc, char** argv)
 
 			//calculation of theta_dot which is the variable vth here
 			vth = -(wheel_lin_vel[0]+wheel_lin_vel[1]+wheel_lin_vel[2])/(3*robot_base_radius);
-			delta_th = vth*dt/4; //don't understand why a factor 4 is needed to achieve correct angle measurement
+			delta_th = vth*dt/4; //don't understand why a factor 4 is needed to achieve correct angle measurement, maybe because of quadrature encoder ?
 
 			//ROS_INFO("delta_th=%f", delta_th);
 
@@ -170,10 +172,10 @@ int main (int argc, char** argv)
 			delta_x = vx*dt;
 			delta_y = vy*dt;
 
-			//accumulated position and angle, this will drift over time with the accumulated errors
-			x += delta_x;
-			y += delta_y;
-			th += delta_th; 
+			//accumulated position rotated by delta_th and final angle, this will drift over time with the accumulated errors
+			x += cos(delta_th)*delta_x - sin(delta_th)*delta_y; //delta_x;
+			y += sin(delta_th)*delta_x + cos(delta_th)*delta_y; //delta_y;
+			th += delta_th;
 
 			ROS_INFO("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
 			//ROS_INFO("vx=%f, delta_x=%f, x=%f", vx, delta_x, x);
@@ -217,6 +219,8 @@ int main (int argc, char** argv)
 			// publishing the odometry and the new tf
 			broadcaster.sendTransform(odom_trans);
 			odom_pub.publish(odom);
+
+			motor_data_array_arrived = false;
 
 			loop_rate.sleep();
 		}
