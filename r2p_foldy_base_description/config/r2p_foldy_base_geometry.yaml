@@ -1,10 +1,10 @@
 #
-# File description of the mobile base geometry, assuming a 3 wheels holonomic robot.
+# File description of the R2O1 mobile base geometry, a 3 wheels holonomic robot.
 #
 
 holonomic_base: 
-  wheel_radius: 0.04
-  base_radius: 0.2
+  wheel_radius: 0.0625
+  base_radius: 0.29
   maximum_velocity_rpm: 50
-  gearbox_ratio_num: 128
+  gearbox_ratio_num: 28
   gearbox_ratio_den: 1

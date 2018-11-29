@@ -1,92 +1,194 @@
+/*
+ * Copyright (c) 2018, The Robot Studio
+ *  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *	* Redistributions of source code must retain the above copyright notice, this
+ *	  list of conditions and the following disclaimer.
+ *
+ *	* Redistributions in binary form must reproduce the above copyright notice,
+ *	  this list of conditions and the following disclaimer in the documentation
+ *	  and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/**
+ * @file base_controller.cpp
+ * @author Cyril Jourdan
+ * @date Nov 29, 2018
+ * @version 0.1.0
+ * @brief File for the controller of the holonomic base with 3 wheels
+ * With help of website https://bharat-robotics.github.io/blog/kinematic-analysis-of-holonomic-robot
+ *
+ * Contact: cyril.jourdan@therobotstudio.com
+ * Created on : Nov 29, 2018
+ */
+
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <osa_msgs/MotorCmdMultiArray.h>
 #include <iostream>
+#include "osa_common/enums.h"
+
+#define NUMBER_MOTORS_BASE 3
 
 using namespace std;
 
-double width_robot = 0.1;
-double vl = 0.0;
-double vr = 0.0;
-ros::Time last_time;	
-double right_enc = 0.0;
-double left_enc = 0.0;
-double right_enc_old = 0.0;
-double left_enc_old = 0.0;
-double distance_left = 0.0;
-double distance_right = 0.0;
+geometry_msgs::Twist cmd_vel;
+osa_msgs::MotorCmdMultiArray mobileBaseMotorCmd_ma;
+
+bool cmd_vel_arrived = false;
+
+const double gear_ratio = 28/1;
+const double enc_tic_per_motor_turn = 1000*4; //multiply by 4 for the quadrate encoder
+const double enc_tic_per_shaft_turn = enc_tic_per_motor_turn*gear_ratio;
+const double robot_base_radius = 0.29; //in meters
+const double swedish_wheel_radius = 0.0625;
+
+//double width_robot = 0.1;
+double vl = 0.0; //V1
+double vr = 0.0; //V2
+double vb = 0.0; //V3
+ros::Time curr_time;
+ros::Time prev_time;
+double dt = 0.0;
+double right_rpm = 0.0;
+double left_rpm = 0.0;
+double back_rpm = 0.0;
 double ticks_per_meter = 100;
 double x = 0.0;
 double y = 0.0;
-double th = 0.0;
-geometry_msgs::Quaternion odom_quat;
+double th = 0.0; //to be shifted by +M_PI/6 ?
 
-void cmd_velCallback(const geometry_msgs::Twist &twist_aux)
+void cmdVelCallback(const geometry_msgs::TwistConstPtr &twist)
 {
-	geometry_msgs::Twist twist = twist_aux;	
-	double vel_x = twist_aux.linear.x;
-	double vel_th = twist_aux.angular.z;
-	double right_vel = 0.0;
-	double left_vel = 0.0;
-
-	if(vel_x == 0){  // turning
-		right_vel = vel_th * width_robot / 2.0;
-		left_vel = (-1) * right_vel;
-	}else if(vel_th == 0){ // fordward / backward
-		left_vel = right_vel = vel_x;
-	}else{ // moving doing arcs
-		left_vel = vel_x - vel_th * width_robot / 2.0;
-		right_vel = vel_x + vel_th * width_robot / 2.0;
-	}
-	vl = left_vel;
-	vr = right_vel;	
+	cmd_vel = *twist;
+	cmd_vel_arrived = true;
 }
 
-int main(int argc, char** argv){
+int main(int argc, char** argv)
+{
+	// Initialize ROS
 	ros::init(argc, argv, "osa_r2p_base_controller");
-	ros::NodeHandle n;
-	ros::Subscriber cmd_vel_sub = n.subscribe("cmd_vel", 10, cmd_velCallback);
-	ros::Rate loop_rate(10);
+	ros::NodeHandle nh("~");
+
+	//Subscribers
+	ros::Subscriber cmd_vel_sub = nh.subscribe("cmd_vel", 10, cmdVelCallback);
+	//Publishers
+	ros::Publisher pub_setMobileBaseCommand = nh.advertise<osa_msgs::MotorCmdMultiArray>("/foldy_base/motor_cmd_to_filter", 1); //set_mobile_base_cmd
+
+	ros::Rate loop_rate(10); //test up to 50Hz
+
+	//create the commands multi array
+	mobileBaseMotorCmd_ma.layout.dim.push_back(std_msgs::MultiArrayDimension());
+	mobileBaseMotorCmd_ma.layout.dim[0].size = NUMBER_MOTORS_BASE;
+	mobileBaseMotorCmd_ma.layout.dim[0].stride = NUMBER_MOTORS_BASE;
+	mobileBaseMotorCmd_ma.layout.dim[0].label = "motors";
+	mobileBaseMotorCmd_ma.layout.data_offset = 0;
+	mobileBaseMotorCmd_ma.motor_cmd.clear();
+	mobileBaseMotorCmd_ma.motor_cmd.resize(NUMBER_MOTORS_BASE);
+
+	for(int i=0; i<NUMBER_MOTORS_BASE; i++)
+	{
+		//mobileBaseMotorCmd_ma.motor_cmd[i].slaveBoardID = BIBOT_BASE_SLAVEBOARD_ID;
+		mobileBaseMotorCmd_ma.motor_cmd[i].node_id = i+1;
+		mobileBaseMotorCmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
+		mobileBaseMotorCmd_ma.motor_cmd[i].value = 0;
+	}
+
+	float wheel_radius = 0;
+	float base_radius = 0;
+	int maximum_velocity_rpm = 0;
+
+	double vx = 0.0;
+	double vy = 0.0;
+	double vth = 0.0;
+	double delta_th = 0.0;
+
+	//Grab parameters
+	try
+	{
+		nh.param("/holonomic_base/wheel_radius", wheel_radius, (float)0.0625);
+		nh.param("/holonomic_base/base_radius", base_radius, (float)0.29);
+		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)50);
+
+		ROS_INFO("Grab the Foldy Base parameters: [%f,%f,%d]", wheel_radius, base_radius, maximum_velocity_rpm);
+	}
+	catch(ros::InvalidNameException const &e)
+	{
+		ROS_ERROR(e.what());
+		ROS_ERROR("Parameter of Foldy Base didn't load correctly!");
+		ROS_ERROR("Please check the name and try again.");
+
+		throw e;
+	}
+
+	curr_time = ros::Time::now();
+	prev_time = ros::Time::now();
 
 	while(ros::ok())
 	{
-
-		double dxy = 0.0;
-		double dth = 0.0;
-		ros::Time current_time = ros::Time::now();
-		double dt;
-		double velxy = dxy / dt;
-		double velth = dth / dt;
-
+		//read the SLAM output
 		ros::spinOnce();
-		dt =  (current_time - last_time).toSec();;
-		last_time = current_time;
 
-		// calculate odomety
-		if(right_enc == 0.0){
-			distance_left = 0.0;
-			distance_right = 0.0;
-		}else{
-			distance_left = (left_enc - left_enc_old) / ticks_per_meter;
-			distance_right = (right_enc - right_enc_old) / ticks_per_meter;
-		} 
+		if(cmd_vel_arrived)
+		{
+			// time calculation
+			curr_time = ros::Time::now();
+			dt = (curr_time - prev_time).toSec();
 
-		left_enc_old = left_enc;
-		right_enc_old = right_enc;
+			//reset base value to default
+			for(int i=0; i<NUMBER_MOTORS_BASE; i++)
+			{
+				mobileBaseMotorCmd_ma.motor_cmd[i].node_id = i+1;
+				mobileBaseMotorCmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
+				mobileBaseMotorCmd_ma.motor_cmd[i].value = 0;
+			}
 
-		dxy = (distance_left + distance_right) / 2.0;
-		dth = (distance_right - distance_left) / width_robot;
+			//get the demanded velocity in x, y and theta
+			vx = cmd_vel.linear.x;
+			vy = cmd_vel.linear.y;
+			vth = cmd_vel.angular.z;
 
-		if(dxy != 0){
-			x += dxy * cosf(dth);
-			y += dxy * sinf(dth);
-		}	
+			delta_th = vth*dt;
 
-		if(dth != 0){
-			th += dth;
+			// Inverse kinemtics formula, perhaps need to change the sign of X_dot, the first column in the matrix P(theta)
+			// This gives linear velocity of each wheel, left right and back
+			vl = -cos(delta_th)*vx - sin(delta_th)*vy + robot_base_radius*vth;
+			vr = cos(M_PI/3-delta_th)*vx + sin(M_PI/3-delta_th)*vy + robot_base_radius*vth;
+			vb = cos(M_PI/3+delta_th)*vx + sin(M_PI/3+delta_th)*vy + robot_base_radius*vth;
+
+			// We need to convert this values to rpm (revolution per minute), relatively to the motor without gearbox
+			left_rpm = ((vl*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
+			right_rpm = ((vr*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
+			back_rpm = ((vb*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
+
+			// Asign result to the msg
+			mobileBaseMotorCmd_ma.motor_cmd[0].value = left_rpm;
+			mobileBaseMotorCmd_ma.motor_cmd[1].value = right_rpm;
+			mobileBaseMotorCmd_ma.motor_cmd[2].value = back_rpm;
+
+			//publish to the command filter node
+			pub_setMobileBaseCommand.publish(mobileBaseMotorCmd_ma);
+
+			cmd_vel_arrived = false;
+			prev_time = curr_time;
+
+			loop_rate.sleep();
 		}
-		odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0,0,th);
-		loop_rate.sleep();
 	}
 }

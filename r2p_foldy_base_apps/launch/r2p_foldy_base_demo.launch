@@ -3,5 +3,12 @@
 		<arg name="can_ns" value="foldy_base" />
 	</include>
 	
-	<include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/>
+	<!-- Load parameters -->
+	<rosparam file="$(find r2p_foldy_base_description)/config/r2p_foldy_base_geometry.yaml" command="load"/>
+	
+	<!--include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/-->
+	
+	<include file="$(find r2p2_foldy_base_description)/launch/r2p2_foldy_base_rviz.launch">
+		<arg name="model" value="r2p2_foldy_base_rviz" />
+	</include>
 </launch>

@@ -102,9 +102,9 @@ int main (int argc, char** argv)
 	//Grab parameters
 	try
 	{
-		nh.param("/holonomic_base/wheel_radius", wheel_radius, (float)0.04);
-		nh.param("/holonomic_base/base_radius", base_radius, (float)0.2);
-		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)100);
+		nh.param("/holonomic_base/wheel_radius", wheel_radius, (float)0.0625);
+		nh.param("/holonomic_base/base_radius", base_radius, (float)0.29);
+		nh.param("/holonomic_base/maximum_velocity_rpm", maximum_velocity_rpm, (int)50);
 
 		ROS_INFO("Grab the Foldy Base parameters: [%f,%f,%d]", wheel_radius, base_radius, maximum_velocity_rpm);
 	}
@@ -142,7 +142,7 @@ int main (int argc, char** argv)
 		motor_cmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
 		motor_cmd_ma.motor_cmd[i].value = 0;
 	}
-
+/*
 	float baseLR_f = 0; //left right
 	float baseUD_f = 0; //up down
 
@@ -150,7 +150,7 @@ int main (int argc, char** argv)
 	float rightWheel_f = 0;
 	int leftWheel_i = 0;
 	int rightWheel_i = 0;
-
+*/
 	switch_node = true; //switch on by default
 
 	float joy_h = 0; //x horizontal v(x,y)

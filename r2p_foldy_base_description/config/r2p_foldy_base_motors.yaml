@@ -54,5 +54,5 @@ robot:
 # Base
 dof1: {name: 'wheel/left', type: 'WHEEL', node_id: 1, controller: 'EPOS4', motor: 'ECI40', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
 dof2: {name: 'wheel/right', type: 'WHEEL', node_id: 2, controller: 'EPOS4', motor: 'ECI40', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
-dof3: {name: 'wheel/middle', type: 'WHEEL', node_id: 3, controller: 'EPOS4', motor: 'ECI40', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
+dof3: {name: 'wheel/back', type: 'WHEEL', node_id: 3, controller: 'EPOS4', motor: 'ECI40', inverted: false, mode: 'PROFILE_VELOCITY_MODE', value: 0}
 

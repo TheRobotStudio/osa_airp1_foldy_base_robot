@@ -50,7 +50,7 @@
 /*** Variables ***/
 bool joy_arrived = false;
 sensor_msgs::Joy xboxJoy;
-osa_msgs::MotorCmdMultiArray mobileBaseMotorCmd_ma;
+//osa_msgs::MotorCmdMultiArray mobileBaseMotorCmd_ma;
 
 //booleans
 bool switch_node = false; //disable by default
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 	r2p_foldy_base_apps::getSlaveCmdArray srv_getSlaveCmdArrayMobileBaseManual;
 	r2p_foldy_base_apps::switchNode srv_switchNodeMobileBaseManual;
 	srv_switchNodeMobileBaseManual.request.state = false;
-
+/*
 	//create the commands multi array
 	mobileBaseMotorCmd_ma.layout.dim.push_back(std_msgs::MultiArrayDimension());
 	mobileBaseMotorCmd_ma.layout.dim[0].size = NUMBER_MOTORS_BASE;
@@ -110,21 +110,22 @@ int main(int argc, char** argv)
 		mobileBaseMotorCmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
 		mobileBaseMotorCmd_ma.motor_cmd[i].value = 0;
 	}
-
+*/
 	//No conductor above, so switched on by default
 	switch_node = true;
 	mobileBaseManual_enabled = true;
 
 	while(ros::ok())
 	{
+		/*
 		//Default base value
 		for(int i=0; i<NUMBER_MOTORS_BASE; i++)
 		{
 			mobileBaseMotorCmd_ma.motor_cmd[i].node_id = i+1;
-			mobileBaseMotorCmd_ma.motor_cmd[i].command = SET_CURRENT_MODE_SETTING_VALUE;
+			mobileBaseMotorCmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE; //SET_CURRENT_MODE_SETTING_VALUE;
 			mobileBaseMotorCmd_ma.motor_cmd[i].value = 0;
 		}
-
+*/
 		//read the joystick inputs
 		ros::spinOnce();
 
@@ -134,7 +135,7 @@ int main(int argc, char** argv)
 			{
 				if(srvClt_getMobileBaseManualCmd.call(srv_getSlaveCmdArrayMobileBaseManual))
 				{
-					//publish to the commandBuilder node
+					//publish to the command filter node
 					pub_setMobileBaseCommand.publish(srv_getSlaveCmdArrayMobileBaseManual.response.motorCmdMultiArray);
 				}
 				else

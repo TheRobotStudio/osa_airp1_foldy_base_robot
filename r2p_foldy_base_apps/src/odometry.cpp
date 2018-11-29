@@ -90,10 +90,10 @@ int main (int argc, char** argv)
 	double wheel_lin_vel[3] = {0}; //V1, V2, V3
 
 	const double gear_ratio = 28/1;
-	const double enc_tic_per_motor_turn = 1000*4; //division by 4 for the quadrate encoder
+	const double enc_tic_per_motor_turn = 1000*4; //multiply by 4 for the quadrate encoder
 	const double enc_tic_per_shaft_turn = enc_tic_per_motor_turn*gear_ratio;
-	const double robot_base_radius = 0.27; //in meters
-	const double swedish_wheel_radius = 0.06;
+	const double robot_base_radius = 0.29; //in meters
+	const double swedish_wheel_radius = 0.0625;
 
 	ros::Time curr_time;
 	ros::Time prev_time;
@@ -140,8 +140,6 @@ int main (int argc, char** argv)
 			curr_time = ros::Time::now();
 			dt = (curr_time - prev_time).toSec();
 
-			//ROS_INFO("dt=%f", dt);
-			
 			// encoder position
 			for(int i=0; i<3; i++)
 			{
@@ -160,27 +158,25 @@ int main (int argc, char** argv)
 
 			//calculation of theta_dot which is the variable vth here
 			vth = -(wheel_lin_vel[0]+wheel_lin_vel[1]+wheel_lin_vel[2])/(3*robot_base_radius);
-			delta_th = vth*dt;// /4 //don't understand why a factor 4 is needed to achieve correct angle measurement, maybe because of quadrature encoder ?
+			delta_th = vth*dt;
 
 			//ROS_INFO("delta_th=%f", delta_th);
 
-			vx = -2*(-cos(delta_th)*wheel_lin_vel[0] + cos(M_PI/3-delta_th)*wheel_lin_vel[1]  + cos(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
-			//ROS_INFO("vx1=%f", vx);
+			vx = -2*(-cos(delta_th)*wheel_lin_vel[0] + cos(M_PI/3-delta_th)*wheel_lin_vel[1]  + cos(M_PI/3+delta_th)*wheel_lin_vel[2])/3; //multiply by -1 to change X direction
 			vy = 2*(-sin(delta_th)*wheel_lin_vel[0] - sin(M_PI/3-delta_th)*wheel_lin_vel[1]  + sin(M_PI/3+delta_th)*wheel_lin_vel[2])/3;
-			//ROS_INFO("vy=%f", vy);
 
 			delta_x = vx*dt;
 			delta_y = vy*dt;
 
 			//accumulated position rotated by delta_th and final angle, this will drift over time with the accumulated errors
-			//Not sure why I need to remove an angle of Pi/6, probably because of the arangement of the wheels 120 degrees appart, or 2Pi/3
-			x += cos(th-M_PI/6)*delta_x - sin(th-M_PI/6)*delta_y; //delta_x;
-			y += sin(th-M_PI/6)*delta_x + cos(th-M_PI/6)*delta_y; //delta_y;
+			//The angle of Pi/6 is because of the convention of having a wheel on the X axis as opposed to the Y axis
+			x += cos(th-M_PI/6)*delta_x - sin(th-M_PI/6)*delta_y;
+			y += sin(th-M_PI/6)*delta_x + cos(th-M_PI/6)*delta_y;
 			th += delta_th;
 
-			//ROS_INFO("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
+			ROS_DEBUG("vth=%f, delta_th=%f, vx=%f, vy=%f, delta_x=%f, delta_y=%f, x=%f, y=%f, th=%f", vth, delta_th, vx, vy, delta_x, delta_y, x, y, th);
 			//ROS_INFO("vx=%f, delta_x=%f, x=%f", vx, delta_x, x);
-			ROS_INFO("dx=%f", delta_x);
+			//ROS_INFO("dx=%f", delta_x);
 			
 			geometry_msgs::Quaternion odom_quat;
 			odom_quat = tf::createQuaternionMsgFromRollPitchYaw(0,0,th);
@@ -212,16 +208,16 @@ int main (int argc, char** argv)
 			odom.twist.twist.angular.y = 0.0;
 			odom.twist.twist.angular.z = vth;
 
-			prev_time = curr_time;
-			prev_mot_enc_pos[0] = curr_mot_enc_pos[0];
-			prev_mot_enc_pos[1] = curr_mot_enc_pos[1];
-			prev_mot_enc_pos[2] = curr_mot_enc_pos[2];
-
 			// publishing the odometry and the new tf
 			broadcaster.sendTransform(odom_trans);
 			odom_pub.publish(odom);
 
 			motor_data_array_arrived = false;
+
+			prev_time = curr_time;
+			prev_mot_enc_pos[0] = curr_mot_enc_pos[0];
+			prev_mot_enc_pos[1] = curr_mot_enc_pos[1];
+			prev_mot_enc_pos[2] = curr_mot_enc_pos[2];
 
 			loop_rate.sleep();
 		}
