@@ -1,0 +1,24 @@
+r2p_foldy_base:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  # Velocity Controllers ---------------------------------------
+  left_wheel_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: left_wheel_to_base_link_joint
+    pid: {p: 3.0, i: 0.0, d: 0.0}
+    required_drive_mode: 3
+
+  right_wheel_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: right_wheel_to_base_link_joint
+    pid: {p: 3.0, i: 0.0, d: 0.0}
+    required_drive_mode: 3
+
+  back_wheel_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: back_wheel_to_base_link_joint
+    pid: {p: 3.0, i: 0.0, d: 0.0}
+    required_drive_mode: 3
