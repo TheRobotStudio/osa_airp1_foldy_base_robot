@@ -1,13 +1,15 @@
 <launch>
 
 	<!-- Load the URDF into ROS parameter server -->
-	<param name="robot_description"	command="$(find xacro)/xacro.py '$(find r2p_folday_base_description)/urdf/r2p_folday_base.robot.xacro'" />
+	<param name="robot_description"	command="$(find xacro)/xacro.py '$(find r2p_foldy_base_description)/urdf/r2p_foldy_base_gazebo.xacro'" />
 
-	<node name="canopen_motor" pkg="canopen_motor_node" type="canopen_motor_node" output="screen" clear_params="true" ns="/r2p_folday_base">
-    		<rosparam command="load" file="$(find r2p_folday_base_canopen)/config/canopen_bus_layer.yaml" />
+	<node name="canopen_motor" pkg="canopen_motor_node" type="canopen_motor_node" output="screen" clear_params="true" ns="/r2p_foldy_base">
+    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/canopen_bus_layer.yaml" />
+    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/controller.yaml" />
+    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/node_layer.yaml" />
 	</node>
 
-	<include file="$(find r2p_folday_base_control)/launch/r2p_folday_base_control.launch"/>
+	<!-- include file="$(find r2p_foldy_base_control)/launch/r2p_foldy_base_control.launch"/ -->
 
 	<!-- Show in Rviz  -->
 	<!--node name="rviz" pkg="rviz" type="rviz"/-->

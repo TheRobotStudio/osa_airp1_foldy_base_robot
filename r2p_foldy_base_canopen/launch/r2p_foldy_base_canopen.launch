@@ -2,20 +2,21 @@
 
 	<!-- Load the URDF into ROS parameter server -->
 	<param name="robot_description"
-     		command="$(find xacro)/xacro.py '$(find r2p_foldy_base_description)/urdf/r2p_foldy_base.gazebo.xacro'" />
+     		command="$(find xacro)/xacro.py '$(find r2p_foldy_base_description)/urdf/r2p_foldy_base_gazebo.xacro'" />
 
 	<node name="canopen_chain" pkg="canopen_chain_node" type="canopen_chain_node" output="screen" clear_params="true">
-    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/canopen.yaml" />
+    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/canopen_bus_layer.yaml" />
+    		<rosparam command="load" file="$(find r2p_foldy_base_canopen)/config/node_layer.yaml" />
 	</node>
 
-	<rosparam file="$(find r2p_foldy_base_canopen)/config/r2p_foldy_base_control.yaml" command="load"/>
+	<rosparam file="$(find r2p_foldy_base_control)/config/r2p_foldy_base_control.yaml" command="load"/>
 
 	<!-- load the controllers -->
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 	  output="screen" ns="/r2p_foldy_base" args="joint_state_controller
-					   left_wheel_velocity_controller
-					   right_wheel_velocity_controller
-					   back_wheel_velocity_controller"/>
+					   left_omniwheel_velocity_controller
+					   right_omniwheel_velocity_controller
+					   back_omniwheel_velocity_controller"/>
 
 	<!-- Combine joint values -->
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>

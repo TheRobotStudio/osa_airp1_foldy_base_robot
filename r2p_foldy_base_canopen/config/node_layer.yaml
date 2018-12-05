@@ -2,12 +2,17 @@
 nodes:
   node1:
     id: 1
-    name: left_weel
+    name: base_left_omniwheel_joint
     eds_pkg: r2p_foldy_base_canopen # optionals package  name for relative path
     eds_file: "config/EPOS4_ECi40.dcf" # path to EDS/DCF file
   node2:
     id: 2
-    name: right_wheel
+    name: base_right_omniwheel_joint
+    eds_pkg: r2p_foldy_base_canopen # optionals package  name for relative path
+    eds_file: "config/EPOS4_ECi40.dcf" # path to EDS/DCF file
+  node3:
+    id: 3
+    name: base_back_omniwheel_joint
     eds_pkg: r2p_foldy_base_canopen # optionals package  name for relative path
     eds_file: "config/EPOS4_ECi40.dcf" # path to EDS/DCF file
 
