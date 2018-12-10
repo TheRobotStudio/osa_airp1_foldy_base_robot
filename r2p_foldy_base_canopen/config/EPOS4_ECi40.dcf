@@ -492,7 +492,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=255
+ParameterValue=1
 
 [1401]
 ParameterName=Receive PDO 2 parameter
@@ -527,7 +527,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=255
+ParameterValue=1
 
 [1402]
 ParameterName=Receive PDO 3 parameter
@@ -562,7 +562,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=255
+ParameterValue=1
 
 [1403]
 ParameterName=Receive PDO 4 parameter
@@ -597,7 +597,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=255
+ParameterValue=1
 
 [1600]
 ParameterName=Receive PDO 1 mapping
@@ -1020,7 +1020,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=253
+ParameterValue=1
 
 [1800sub3]
 ParameterName=Inhibit time TxPDO 1
@@ -1065,7 +1065,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=253
+ParameterValue=1
 
 [1801sub3]
 ParameterName=Inhibit time TxPDO 2
@@ -1110,7 +1110,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=253
+ParameterValue=1
 
 [1802sub3]
 ParameterName=Inhibit time TxPDO 3
@@ -1155,7 +1155,7 @@ AccessType=rw
 DefaultValue=255
 PDOMapping=0
 ObjFlags=0
-ParameterValue=253
+ParameterValue=1
 
 [1803sub3]
 ParameterName=Inhibit time TxPDO 4

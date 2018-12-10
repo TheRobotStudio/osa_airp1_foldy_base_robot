@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <include file="$(find osa_vision)/launch/realsense_d400.launch">
+        <arg name="camera" value="rs_cam_base"/>
+        <arg name="serial_no" default="817612070200"/>
+    </include>
+
+    <include file="$(find osa_vision)/launch/realsense_d400.launch">
+        <arg name="camera" value="rs_cam_tripod"/>
+        <arg name="serial_no" default="811112060894"/>
+    </include>
+
+</launch>
