@@ -8,7 +8,7 @@
 	
 	<!--include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/-->
 	
-	<include file="$(find r2p2_foldy_base_description)/launch/r2p2_foldy_base_rviz.launch">
-		<arg name="model" value="r2p2_foldy_base.xacro" />
+	<include file="$(find r2p_foldy_base_description)/launch/r2p_foldy_base_rviz.launch">
+		<arg name="model" value="r2p_foldy_base.xacro" />
 	</include>
 </launch>

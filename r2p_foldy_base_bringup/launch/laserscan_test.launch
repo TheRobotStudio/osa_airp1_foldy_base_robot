@@ -2,21 +2,21 @@
 
 <launch>
 
-    <arg name="camera" default="rs_cam_base" />
+    <arg name="camera" default="camera2" />
 
     <!-- start sensor-->
     <include file="$(find osa_vision)/launch/realsense_d400.launch">
-        <arg name="camera" value="rs_cam_base"/>
+        <arg name="camera" value="$(arg camera)"/>
         <arg name="serial_no" default="817612070200"/>
     </include>
 
     <!-- run pointcloud_to_laserscan node -->
-    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan" ns="rs_cam_base">
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
 
         <remap from="cloud_in" to="$(arg camera)/depth_registered/points"/>
-        <!--remap from="scan" to="$(arg camera)/scan"/-->
+        <remap from="scan" to="$(arg camera)/scan"/>
         <rosparam>
-            target_frame: rs_cam_base_link # Leave disabled to output scan in pointcloud frame
+            # target_frame: $(arg camera)_link # Leave disabled to output scan in pointcloud frame
             transform_tolerance: 0.01
             min_height: 0.0
             max_height: 1.0
