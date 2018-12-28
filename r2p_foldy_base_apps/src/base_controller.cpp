@@ -72,7 +72,7 @@ double back_rpm = 0.0;
 double ticks_per_meter = 100;
 double x = 0.0;
 double y = 0.0;
-double th = 0.0; //to be shifted by +M_PI/6 ?
+double th = 0.0; 
 
 void cmdVelCallback(const geometry_msgs::TwistConstPtr &twist)
 {
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 	ros::NodeHandle nh("~");
 
 	//Subscribers
-	ros::Subscriber cmd_vel_sub = nh.subscribe("cmd_vel", 10, cmdVelCallback);
+	ros::Subscriber cmd_vel_sub = nh.subscribe("/foldy_base/cmd_vel", 10, cmdVelCallback);
 	//Publishers
 	ros::Publisher pub_setMobileBaseCommand = nh.advertise<osa_msgs::MotorCmdMultiArray>("/foldy_base/motor_cmd_to_filter", 1); //set_mobile_base_cmd
 
@@ -104,7 +104,6 @@ int main(int argc, char** argv)
 
 	for(int i=0; i<NUMBER_MOTORS_BASE; i++)
 	{
-		//mobileBaseMotorCmd_ma.motor_cmd[i].slaveBoardID = BIBOT_BASE_SLAVEBOARD_ID;
 		mobileBaseMotorCmd_ma.motor_cmd[i].node_id = i+1;
 		mobileBaseMotorCmd_ma.motor_cmd[i].command = SEND_DUMB_MESSAGE;
 		mobileBaseMotorCmd_ma.motor_cmd[i].value = 0;
@@ -137,6 +136,8 @@ int main(int argc, char** argv)
 		throw e;
 	}
 
+	ROS_INFO("start node");
+
 	curr_time = ros::Time::now();
 	prev_time = ros::Time::now();
 
@@ -160,27 +161,40 @@ int main(int argc, char** argv)
 			}
 
 			//get the demanded velocity in x, y and theta
-			vx = cmd_vel.linear.x;
-			vy = cmd_vel.linear.y;
-			vth = cmd_vel.angular.z;
+			vx = cmd_vel.linear.x; //positive x is forward
+			vy = cmd_vel.linear.y; //positive y is left sideway
+			vth = cmd_vel.angular.z; //positive theta around z is turning to the left
 
-			delta_th = vth*dt;
+			double angle_offset = 0; 
+			delta_th = vth*dt+angle_offset;
+
+			ROS_INFO("vx=%f, vy=%f, vth=%f, dth=%f", vx, vy, vth, delta_th);
 
 			// Inverse kinemtics formula, perhaps need to change the sign of X_dot, the first column in the matrix P(theta)
 			// This gives linear velocity of each wheel, left right and back
-			vl = -cos(delta_th)*vx - sin(delta_th)*vy + robot_base_radius*vth;
-			vr = cos(M_PI/3-delta_th)*vx + sin(M_PI/3-delta_th)*vy + robot_base_radius*vth;
-			vb = cos(M_PI/3+delta_th)*vx + sin(M_PI/3+delta_th)*vy + robot_base_radius*vth;
+			// To be seen whether an angle of Pi/6 is necessary, because of a different assumption from the beginning about the X and Y axis orientation relatively to the wheels
+//			vl = -cos(delta_th+angle_offset)*vx + sin(delta_th+angle_offset)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
+//			vr = cos(M_PI/3-delta_th+angle_offset)*vx + sin(M_PI/3-delta_th+angle_offset)*vy + robot_base_radius*vth;
+//			vb = cos(M_PI/3+delta_th+angle_offset)*vx + sin(M_PI/3+delta_th+angle_offset)*vy + robot_base_radius*vth;
+
+//			vl = -sin(delta_th+M_PI/3)*vx + cos(delta_th-M_PI/3)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
+//			vr = -sin(delta_th+M_PI/3)*vx + cos(delta_th+M_PI/3)*vy + robot_base_radius*vth;
+//			vb = sin(delta_th-2*M_PI/3)*vx - cos(delta_th-2*M_PI/3)*vy + robot_base_radius*vth;
+
+			vl = -sin(delta_th+M_PI/3)*vx + cos(delta_th-M_PI/3)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
+			vr = sin(delta_th)*vx - cos(delta_th)*vy + robot_base_radius*vth;
+			vb = sin(delta_th+2*M_PI/3)*vx - cos(delta_th+2*M_PI/3)*vy + robot_base_radius*vth;
 
 			// We need to convert this values to rpm (revolution per minute), relatively to the motor without gearbox
 			left_rpm = ((vl*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
 			right_rpm = ((vr*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
 			back_rpm = ((vb*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
 
+			ROS_INFO("rpm= %f, %f, %f", left_rpm, right_rpm, back_rpm);
 			// Asign result to the msg
-			mobileBaseMotorCmd_ma.motor_cmd[0].value = left_rpm;
-			mobileBaseMotorCmd_ma.motor_cmd[1].value = right_rpm;
-			mobileBaseMotorCmd_ma.motor_cmd[2].value = back_rpm;
+			mobileBaseMotorCmd_ma.motor_cmd[0].value = -(int)(left_rpm/2); // divided by 2 to decrease the speed, TODO use the max velocity param instead
+			mobileBaseMotorCmd_ma.motor_cmd[1].value = -(int)(right_rpm/2);// add a minus sign because the maxon non inverted convention is counter-clockwise ?
+			mobileBaseMotorCmd_ma.motor_cmd[2].value = -(int)(back_rpm/2);
 
 			//publish to the command filter node
 			pub_setMobileBaseCommand.publish(mobileBaseMotorCmd_ma);

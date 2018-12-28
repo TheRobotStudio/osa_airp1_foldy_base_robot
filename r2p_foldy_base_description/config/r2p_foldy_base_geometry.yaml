@@ -5,6 +5,6 @@
 holonomic_base: 
   wheel_radius: 0.0625
   base_radius: 0.29
-  maximum_velocity_rpm: 50
+  maximum_velocity_rpm: 20
   gearbox_ratio_num: 28
   gearbox_ratio_den: 1

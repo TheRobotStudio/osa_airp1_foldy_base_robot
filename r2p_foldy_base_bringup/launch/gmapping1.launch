@@ -1,9 +1,0 @@
-<launch>
-	<include file="$(find r2p_foldy_base_bringup)/launch/pointcloud_to_laserscan.launch">
-		<arg name="camera" value="camera"/>
-	</include>
-
-	<node name="osa_gmapping_node" pkg="gmapping" type="slam_gmapping" output="screen" respawn="false" launch-prefix="xterm -e"> 
-		<param name="robot_namespace" type="string" value="/$(arg can_ns)" />
-	</node>
-</launch>

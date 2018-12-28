@@ -32,8 +32,8 @@ TrajectoryPlannerROS:
   oscillation_reset_dist: 0.05
 
 # Differential-drive robot configuration
-  holonomic_robot: false
-  max_vel_y: 0.0
-  min_vel_y: 0.0
-  acc_lim_y: 0.0
-  vy_samples: 1
+  holonomic_robot: true 
+  max_vel_y: 0.3
+  min_vel_y: 0.1
+  acc_lim_y: 0.5
+  vy_samples: 6

@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
 	<!-- CAN namespace -->	
 	<!-- TODO add robot name and move to a common pkg -->	
@@ -22,4 +23,10 @@
 			<param name="robot_namespace" type="string" value="/$(arg can_ns)" />		
 		</node>
 	</group>
+
+    <!-- start realsense camera and laserscan -->
+    <include file="$(find r2p_foldy_base_bringup)/launch/pointcloud_to_laserscan.launch">
+        <arg name="camera" value="camera"/>
+    </include>
+
 </launch>

@@ -6,9 +6,13 @@
 	<!-- Load parameters -->
 	<rosparam file="$(find r2p_foldy_base_description)/config/r2p_foldy_base_geometry.yaml" command="load"/>
 	
-	<!--include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/-->
+	<include file="$(find r2p_foldy_base_apps)/launch/kiwi_drive.launch"/>
 	
-	<include file="$(find r2p_foldy_base_description)/launch/r2p_foldy_base_rviz.launch">
+	<!--include file="$(find r2p_foldy_base_description)/launch/r2p_foldy_base_rviz.launch">
 		<arg name="model" value="r2p_foldy_base.xacro" />
-	</include>
+	</include-->
+
+	<node name="osa_r2p_odometry" pkg="r2p_foldy_base_apps" type="osa_r2p_odometry" output="screen" respawn="true" launch-prefix="xterm -e"/>
+
+	<node name="osa_r2p_base_controller" pkg="r2p_foldy_base_apps" type="osa_r2p_base_controller" output="screen" respawn="true" launch-prefix="xterm -e"/>
 </launch>
