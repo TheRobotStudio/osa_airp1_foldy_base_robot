@@ -165,25 +165,15 @@ int main(int argc, char** argv)
 			vy = cmd_vel.linear.y; //positive y is left sideway
 			vth = cmd_vel.angular.z; //positive theta around z is turning to the left
 
-			double angle_offset = 0; 
-			delta_th = vth*dt+angle_offset;
+			delta_th = vth*dt;
 
 			ROS_INFO("vx=%f, vy=%f, vth=%f, dth=%f", vx, vy, vth, delta_th);
 
-			// Inverse kinemtics formula, perhaps need to change the sign of X_dot, the first column in the matrix P(theta)
+			// Inverse kinemtics formula 
 			// This gives linear velocity of each wheel, left right and back
-			// To be seen whether an angle of Pi/6 is necessary, because of a different assumption from the beginning about the X and Y axis orientation relatively to the wheels
-//			vl = -cos(delta_th+angle_offset)*vx + sin(delta_th+angle_offset)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
-//			vr = cos(M_PI/3-delta_th+angle_offset)*vx + sin(M_PI/3-delta_th+angle_offset)*vy + robot_base_radius*vth;
-//			vb = cos(M_PI/3+delta_th+angle_offset)*vx + sin(M_PI/3+delta_th+angle_offset)*vy + robot_base_radius*vth;
-
-//			vl = -sin(delta_th+M_PI/3)*vx + cos(delta_th-M_PI/3)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
-//			vr = -sin(delta_th+M_PI/3)*vx + cos(delta_th+M_PI/3)*vy + robot_base_radius*vth;
-//			vb = sin(delta_th-2*M_PI/3)*vx - cos(delta_th-2*M_PI/3)*vy + robot_base_radius*vth;
-
-			vl = -sin(delta_th+M_PI/3)*vx + cos(delta_th-M_PI/3)*vy + robot_base_radius*vth; //X_dot sign has been changed to -, also on the 2 other lines
-			vr = sin(delta_th)*vx - cos(delta_th)*vy + robot_base_radius*vth;
-			vb = sin(delta_th+2*M_PI/3)*vx - cos(delta_th+2*M_PI/3)*vy + robot_base_radius*vth;
+			vl = -sin(delta_th+M_PI/3)*vx + cos(delta_th+M_PI/3)*vy + robot_base_radius*vth; 
+			vr = sin(M_PI/3-delta_th)*vx + cos(M_PI/3-delta_th)*vy + robot_base_radius*vth;
+			vb = sin(delta_th)*vx - cos(delta_th)*vy + robot_base_radius*vth;
 
 			// We need to convert this values to rpm (revolution per minute), relatively to the motor without gearbox
 			left_rpm = ((vl*60)/(2*M_PI*swedish_wheel_radius))*gear_ratio;
