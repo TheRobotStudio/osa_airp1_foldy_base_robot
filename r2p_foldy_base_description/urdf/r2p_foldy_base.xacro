@@ -16,6 +16,10 @@
     </inertial>
   </xacro:macro>
 
+  <!-- Dummy Link -->
+  <link name="dummy_link">
+  </link>
+
   <!-- Base Link -->
   <link name="base_link">
     <visual>
@@ -42,8 +46,16 @@
     </inertial>
   </link>
 
+  <!-- Joint between Dummy Link and Base Link -->
+  <joint name="dummy_base_joint" type="fixed">
+    <parent link="dummy_link"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+
   <!-- Realsense Camera Base Link -->
-  <link name="camera_link">
+  <link name="rs_cam_base_link">
     <visual>
       <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
       <geometry>
@@ -69,9 +81,9 @@
   </link>
   
   <!-- Joint between Base Link and Realsense Camera Base Link -->
-  <joint name="base_camera_joint" type="fixed">
+  <joint name="base_rs_cam_base_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="camera_link"/>
+    <child link="rs_cam_base_link"/>
     <origin xyz="0.15 0 0.20" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
   </joint>

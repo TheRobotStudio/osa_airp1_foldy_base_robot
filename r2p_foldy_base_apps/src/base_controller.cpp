@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Robot Studio
+ * Copyright (c) 2019, The Robot Studio
  *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
 /**
  * @file base_controller.cpp
  * @author Cyril Jourdan
- * @date Nov 29, 2018
+ * @date Jan 4, 2019
  * @version 0.1.0
  * @brief File for the controller of the holonomic base with 3 wheels
  * With help of website https://bharat-robotics.github.io/blog/kinematic-analysis-of-holonomic-robot
