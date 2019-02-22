@@ -113,7 +113,7 @@ int main (int argc, char** argv)
 	// message declarations
 	geometry_msgs::TransformStamped odom_trans;
 	odom_trans.header.frame_id = "odom";
-	odom_trans.child_frame_id = "base_link";
+	odom_trans.child_frame_id = "dummy_link";
 
 	//grasp first position before starting the loop
 	if(ros::ok())
@@ -192,7 +192,7 @@ int main (int argc, char** argv)
 			nav_msgs::Odometry odom;
 			odom.header.stamp = curr_time;
 			odom.header.frame_id = "odom";
-			odom.child_frame_id = "base_link";
+			odom.child_frame_id = "dummy_link";
 
 			// position
 			odom.pose.pose.position.x = x;

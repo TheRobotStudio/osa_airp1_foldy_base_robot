@@ -1,4 +1,7 @@
+<?xml version="1.0"?>
+
 <launch>
+
 	<include file="$(find r2p_foldy_base_bringup)/launch/r2p_foldy_base_bringup.launch">
 		<arg name="can_ns" value="foldy_base" />
 	</include>
@@ -15,4 +18,7 @@
 	<node name="osa_r2p_odometry" pkg="r2p_foldy_base_apps" type="osa_r2p_odometry" output="screen" respawn="true" launch-prefix="xterm -e"/>
 
 	<node name="osa_r2p_base_controller" pkg="r2p_foldy_base_apps" type="osa_r2p_base_controller" output="screen" respawn="true" launch-prefix="xterm -e"/>
+
+	<!--include file="$(find r2p_foldy_base_bringup)/launch/amcl.launch"/-->
+
 </launch>

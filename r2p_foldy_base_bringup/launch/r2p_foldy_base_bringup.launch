@@ -24,9 +24,12 @@
 		</node>
 	</group>
 
-    <!-- start realsense camera and laserscan -->
-    <include file="$(find r2p_foldy_base_bringup)/launch/pointcloud_to_laserscan.launch">
-        <arg name="camera" value="camera"/>
-    </include>
+    <!-- start camera -->
+    <!--include file="$(find r2p_foldy_base_bringup)/launch/realsense_base_camera.launch"/-->
+
+    <!-- start laserscan -->
+    <!--include file="$(find r2p_foldy_base_bringup)/launch/pointcloud_to_laserscan.launch">
+        <arg name="camera" value="rs_cam_base"/>
+    </include-->
 
 </launch>

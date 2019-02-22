@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <launch>
 
 	<node name="osa_xboxjoy_node" pkg="joy" type="joy_node" output="screen" respawn="true">
