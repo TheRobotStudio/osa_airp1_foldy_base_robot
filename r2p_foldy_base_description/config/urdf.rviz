@@ -6,17 +6,12 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1
         - /TF1/Frames1
-        - /PointCloud21
-        - /LaserScan1
-        - /Odometry1
         - /Odometry1/Shape1
         - /Odometry1/Covariance1
-        - /Static Map1
         - /Static Map1/Orientation1
-        - /Global Costmap1
-        - /Local Costmap1
+        - /PointCloud2 tripod1
+        - /PointCloud2 tripod1/Status1
       Splitter Ratio: 0.691666663
     Tree Height: 790
   - Class: rviz/Selection
@@ -318,6 +313,36 @@ Visualization Manager:
       Topic: /move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: ""
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2 tripod
+      Position Transformer: ""
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.00999999978
+      Style: Flat Squares
+      Topic: /rs_cam_tripod/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 163; 163; 163
@@ -343,25 +368,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.8420105
+      Distance: 4.37604475
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.01175535
-        Y: -0.153404489
-        Z: 0.00649998849
+        X: 0.94279182
+        Y: -0.853511512
+        Z: 0.00641492009
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.56979632
+      Pitch: 0.719796419
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.34963942
+      Yaw: 2.62463832
     Saved: ~
 Window Geometry:
   Displays:
