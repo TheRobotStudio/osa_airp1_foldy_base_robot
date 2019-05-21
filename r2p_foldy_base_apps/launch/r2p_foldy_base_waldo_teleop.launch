@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<include file="$(find r2p_foldy_base_bringup)/launch/r2p_foldy_base_bringup.launch">
+		<arg name="can_ns" value="foldy_base" />
+	</include>
+	
+	<!-- Load parameters -->
+	<rosparam file="$(find r2p_foldy_base_description)/config/r2p_foldy_base_geometry.yaml" command="load"/>
+	
+	<include file="$(find r2p_foldy_base_apps)/launch/waldo_kiwi_drive.launch"/>
+
+</launch>

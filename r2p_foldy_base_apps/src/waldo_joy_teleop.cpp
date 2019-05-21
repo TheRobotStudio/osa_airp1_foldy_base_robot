@@ -23,7 +23,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *  Created on: Sep 30, 2016
+ *  Created on: Mar 14, 2019
  *      Author: Cyril Jourdan (cyril.jourdan@therobotstudio.com)
  */
 
@@ -47,6 +47,7 @@
 
 /*** Defines ***/
 //#define LOOP_RATE				50 //HEART_BEAT
+#define DEADBAND	1000
 
 using namespace r2p_foldy_base_apps;
 
@@ -163,39 +164,64 @@ int main (int argc, char** argv)
 
 		if(switch_node)
 		{
+			for(int i=0; i<KiwiDrive::NUMBER_OF_WHEELS; i++)
+			{
+				motor_cmd_ma.motor_cmd[i].node_id = i+1;
+				motor_cmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
+//				motor_cmd_ma.motor_cmd[i].value = 0; 
+			}
+
 			if(joy_arrived)
 			{
-				if(!((xboxJoy.axes[3]<0.1)&&(xboxJoy.axes[3]>-0.1)&&(xboxJoy.axes[4]<0.1)&&(xboxJoy.axes[4]>-0.1)))
+			    if(xboxJoy.buttons[4] == 1)
+			    {
+				if(!((xboxJoy.axes[7]<13500+DEADBAND)&&(xboxJoy.axes[7]>13500-DEADBAND)&&(xboxJoy.axes[6]<14300+DEADBAND)&&(xboxJoy.axes[6]>14300-DEADBAND)))
 				{
 
-					joy_h = -1*xboxJoy.axes[3]; //left right
-					joy_v = -1*xboxJoy.axes[4]; //up down
+					joy_h = -1*xboxJoy.axes[7]; //left right
+					joy_v = 1*xboxJoy.axes[6]; //up down
 				}
-				else //add a deadband of +/- 0.1 on both axis
+				else //add a deadband of +/- 1000 on both axis
 				{
-					joy_h = 0;
-					joy_v = 0;
+					joy_h = -13500;
+					joy_v = 14300;
 				}
 
-				if(!((xboxJoy.axes[0]<0.1)&&(xboxJoy.axes[0]>-0.1)))
+				if(!((xboxJoy.axes[5]<16300+DEADBAND)&&(xboxJoy.axes[5]>16300-DEADBAND)))
 				{
-					joy_r = -1*xboxJoy.axes[0]; //left right
+					joy_r = 1*xboxJoy.axes[5]; //turn left right
 				}
-				else //add a deadband of +/- 0.1 on horizontal axis
+				else //add a deadband of +/- 1000 on rotation axis
 				{
-					joy_r = 0;
+					joy_r = 16300;
 				}
+
+
+				// center value
+				joy_h += 13500;
+				joy_v -= 14300;
+				joy_r -= 16300;
+
+
+				// scale value
+				joy_h /= 3500;
+				joy_v /= 9300;
+				joy_r /= 13800;
+
+
+				// clip value				
+				if(joy_h<-1) joy_h = -1;	
+				if(joy_h>1) joy_h = 1;	
+				if(joy_v<-1) joy_v = -1;	
+				if(joy_v>1) joy_v = 1;	
+				if(joy_r<-1) joy_r = -1;	
+				if(joy_r>1) joy_r = 1;	
+
+				ROS_INFO("w(%f, %f, %f)", joy_h, joy_v, joy_r); 
 
 				//compute motor velocities
 				kiwi_drive->computeWheelAngularVelocity(joy_h, joy_v, joy_r, maximum_velocity_rpm);
 
-				//Apply values
-				for(int i=0; i<KiwiDrive::NUMBER_OF_WHEELS; i++)
-				{
-					motor_cmd_ma.motor_cmd[i].node_id = i+1;
-					motor_cmd_ma.motor_cmd[i].command = SET_TARGET_VELOCITY;
-					//motor_cmd_ma.motor_cmd[i].value = kiwi_drive->getWheelAngularVelocity()(i);
-				}
 
 				//factor to increase speed
 				//calculate distance of joystick to the center
@@ -209,6 +235,13 @@ int main (int argc, char** argv)
 				ROS_INFO("w(%d, %d, %d)", motor_cmd_ma.motor_cmd[0].value, motor_cmd_ma.motor_cmd[1].value, motor_cmd_ma.motor_cmd[2].value);
 
 				joy_arrived = false;
+			    }
+			    else
+			    {	
+				motor_cmd_ma.motor_cmd[0].value = 0; 
+				motor_cmd_ma.motor_cmd[1].value = 0; 
+				motor_cmd_ma.motor_cmd[2].value = 0; 
+			    }
 			}
 		}//if(switch_node)
 	}

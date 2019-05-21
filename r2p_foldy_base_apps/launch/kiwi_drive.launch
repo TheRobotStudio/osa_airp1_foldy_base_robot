@@ -2,8 +2,11 @@
 
 <launch>
 
-	<node name="osa_xboxjoy_node" pkg="joy" type="joy_node" output="screen" respawn="true">
+	<node name="osa_xboxjoy_node0" pkg="joy" type="joy_node" output="screen" respawn="true">
 	    <param name="dev" type="string" value="/dev/input/js0" />
+	</node>
+	<node name="osa_xboxjoy_node1" pkg="joy" type="joy_node" output="screen" respawn="true">
+	    <param name="dev" type="string" value="/dev/input/js1" />
 	</node>
 		
 	<node name="osa_kiwi" pkg="r2p_foldy_base_apps" type="osa_r2p_foldy_base_manual" output="screen" respawn="true" launch-prefix="xterm -e"/>

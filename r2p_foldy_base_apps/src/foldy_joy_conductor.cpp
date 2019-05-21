@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The Robot Studio
+ * Copyright (c) 2019, The Robot Studio
  *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,16 +133,18 @@ int main(int argc, char** argv)
 		{
 			if(joy_arrived)
 			{
-				if(srvClt_getMobileBaseManualCmd.call(srv_getSlaveCmdArrayMobileBaseManual))
+				if((xboxJoy.buttons[4] == 1) && (xboxJoy.buttons[5] == 1))
 				{
-					//publish to the command filter node
-					pub_setMobileBaseCommand.publish(srv_getSlaveCmdArrayMobileBaseManual.response.motorCmdMultiArray);
+					if(srvClt_getMobileBaseManualCmd.call(srv_getSlaveCmdArrayMobileBaseManual))
+					{
+						//publish to the command filter node
+						pub_setMobileBaseCommand.publish(srv_getSlaveCmdArrayMobileBaseManual.response.motorCmdMultiArray);
+					}
+					else
+					{
+						ROS_DEBUG("Failed to call service get_mobile_base_manual_cmd");
+					}
 				}
-				else
-				{
-					ROS_DEBUG("Failed to call service get_mobile_base_manual_cmd");
-				}
-
 				joy_arrived = false;
 			}
 

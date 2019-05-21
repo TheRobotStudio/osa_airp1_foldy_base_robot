@@ -29,7 +29,7 @@
  * @author Cyril Jourdan
  * @date Jan 4, 2019
  * @version 0.1.0
- * @brief File for the controller of the holonomic base with 3 wheels
+ * @brief File for the controller of the holonomic base with 3 wheels, it takes the output of the SLAM cmd_vel and turn it into motor commands
  * With help of website https://bharat-robotics.github.io/blog/kinematic-analysis-of-holonomic-robot
  *
  * Contact: cyril.jourdan@therobotstudio.com
