@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<node name="osa_xboxjoy_node0" pkg="joy" type="joy_node" output="screen" respawn="true">
+	    <param name="dev" type="string" value="/dev/input/js0" />
+	</node>
+	<node name="osa_xboxjoy_node1" pkg="joy" type="joy_node" output="screen" respawn="true">
+	    <param name="dev" type="string" value="/dev/input/js1" />
+	</node>
+		
+	<node name="osa_kiwi" pkg="airp1_foldy_base_apps" type="osa_airp1_foldy_base_manual" output="screen" respawn="true" launch-prefix="xterm -e"/>
+	<node name="osa_joy_conductor" pkg="airp1_foldy_base_apps" type="osa_airp1_foldy_joy_conductor" output="screen" respawn="true"/>
+
+</launch>

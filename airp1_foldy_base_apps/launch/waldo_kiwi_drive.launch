@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<node name="osa_waldo_joy_node" pkg="osa_communication" type="osa_waldo_joy" output="screen" respawn="true">
+		<remap from="/waldo_joy" to="/joy"/>
+	</node>
+		
+	<node name="osa_kiwi" pkg="airp1_foldy_base_apps" type="osa_airp1_waldo_joy_teleop" output="screen" respawn="true" launch-prefix="xterm -e"/>
+	<node name="osa_joy_conductor" pkg="airp1_foldy_base_apps" type="osa_airp1_foldy_joy_conductor" output="screen" respawn="true"/>
+
+</launch>

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<!-- Robot Reference Platform for Prototyping - Foldy Base version 01 -->
+<robot name="airp1_foldy_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Constants -->
+  <xacro:property name="damp" value="0.7" />    <!-- damping coefficient -->
+  
+  <!-- Default Inertial -->
+  <xacro:macro name="default_inertial" params="z_value i_value mass">
+    <inertial>
+      <origin xyz="0 0 ${z_value}" rpy="0 0 0"/>
+      <mass value="${mass}" />
+      <inertia ixx="${i_value}" ixy="0.0" ixz="0.0"
+               iyy="${i_value}" iyz="0.0"
+               izz="${i_value}" />
+    </inertial>
+  </xacro:macro>
+
+  <!-- Dummy Link -->
+  <link name="dummy_link">
+  </link>
+
+  <!-- Base Link -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/visual/foldy_base_05_foldy_base_link.dae"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/collision/foldy_base_05_foldy_base_link_collision.stl"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
+    </inertial>
+  </link>
+
+  <!-- Joint between Dummy Link and Base Link -->
+  <joint name="dummy_base_joint" type="fixed">
+    <parent link="dummy_link"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+
+  <!-- Realsense Camera Base Link -->
+  <link name="rs_cam_base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
+      <geometry>
+            <mesh filename="package://airp1_foldy_base_description/meshes/d435.dae"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+            <mesh filename="package://airp1_foldy_base_description/meshes/d435.dae"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+          ixx="1.0" ixy="0.0" ixz="0.0"
+          iyy="1.0" iyz="0.0"
+          izz="1.0"/>
+    </inertial>
+  </link>
+  
+  <!-- Joint between Base Link and Realsense Camera Base Link -->
+  <joint name="base_rs_cam_base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rs_cam_base_link"/>
+    <origin xyz="0.15 0 0.20" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+
+  <!-- Joint between Base Link and Left Omniwheel Link -->
+  <joint name="base_left_omniwheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_omniwheel_link"/>
+    <origin xyz="0.145211 0.251292 0.084925" rpy="0 0 ${pi/3}"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="${damp}"/>
+    <limit effort="100.0" velocity="0.5"/>
+  </joint>
+
+  <!-- Left Omniwheel Link -->
+  <link name="left_omniwheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/visual/foldy_base_05_omniwheel_link.dae"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/collision/foldy_base_05_omniwheel_link_collision.stl"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
+    </inertial>
+  </link>
+  
+  <!-- Joint between Base Link and Right Omniwheel Link -->
+  <joint name="base_right_omniwheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_omniwheel_link"/>
+    <origin xyz="0.145211 -0.251292 0.084925" rpy="0 0 -${pi/3}"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="${damp}"/>
+    <limit effort="100.0" velocity="0.5"/>
+  </joint>
+
+  <!-- Right Omniwheel Link -->
+  <link name="right_omniwheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/visual/foldy_base_05_omniwheel_link.dae"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/collision/foldy_base_05_omniwheel_link_collision.stl"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
+    </inertial>
+  </link>
+  
+  <!-- Joint between Base Link and Back Omniwheel Link -->
+  <joint name="base_back_omniwheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="back_omniwheel_link"/>
+    <origin xyz="-0.290404 -0.000073 0.084925" rpy="0 0 -${pi/2}"/>
+    <axis xyz="0 -1 0"/>
+    <dynamics damping="${damp}"/>
+    <limit effort="100.0" velocity="0.5"/>
+  </joint>
+
+  <!-- Back Omniwheel Link -->
+  <link name="back_omniwheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/visual/foldy_base_05_omniwheel_link.dae"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+	    <mesh filename="package://airp1_foldy_base_description/meshes/collision/foldy_base_05_omniwheel_link_collision.stl"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia
+	  ixx="1.0" ixy="0.0" ixz="0.0"
+	  iyy="1.0" iyz="0.0"
+	  izz="1.0"/>
+    </inertial>
+  </link>
+
+</robot>

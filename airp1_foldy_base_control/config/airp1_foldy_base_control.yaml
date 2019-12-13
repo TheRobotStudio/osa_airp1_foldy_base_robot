@@ -1,0 +1,19 @@
+airp1_foldy_base:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+  
+  # Position Controllers ---------------------------------------
+  base_left_omniwheel_joint_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: base_left_omniwheel_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  base_right_omniwheel_joint_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: base_right_omniwheel_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  base_back_omniwheel_joint_velocity_controller:
+    type: effort_controllers/JointVelocityController
+    joint: base_back_omniwheel_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}

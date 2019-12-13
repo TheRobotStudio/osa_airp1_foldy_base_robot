@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- Robot Reference Platform for Prototyping - Foldy Base version 01 -->
+<robot name="airp1_foldy_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Constants -->  
+  
+  <!-- Import Gazebo elements -->
+  <xacro:include filename="$(find airp1_foldy_base_description)/urdf/airp1_foldy_base.gazebo" />
+      
+  <!-- Import the Foldy Base 01 -->
+  <xacro:include filename="$(find airp1_foldy_base_description)/urdf/airp1_foldy_base.xacro" />    
+  
+  <!-- Dummy Base Link -->
+  <link name="dummy_base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>     
+      <geometry>
+	    <box size="0.00001 0.00001 0.00001" />
+      </geometry> 
+    </visual>   
+  </link>
+
+  <!-- Joint between Dummy Base Link and Base Link -->
+  <joint name="dummy_base_base_fixed" type="fixed">
+    <parent link="dummy_base_link"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <transmission name="transmission1">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_left_omniwheel_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="transmission2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_right_omniwheel_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor2">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="transmission3">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_back_omniwheel_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor3">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+</robot>

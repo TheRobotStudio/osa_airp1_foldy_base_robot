@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Map server -->
+  <arg name="map_file" default="$(find airp1_foldy_base_bringup)/maps/office_test2.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <arg name="initial_pose_x" default="0.0"/> 
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_a" default="0.0"/>
+
+  <include file="$(find airp1_foldy_base_bringup)/launch/includes/amcl.launch.xml">
+
+    <arg name="scan_topic" value="/rs_cam_base/scan"/>
+    <arg name="initial_pose_x" value="0"/>
+    <arg name="initial_pose_y" value="0"/>
+    <arg name="initial_pose_a" value="0"/>
+
+<!--
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+-->
+  </include>
+
+  <include file="$(find airp1_foldy_base_bringup)/launch/includes/move_base.launch.xml">
+    <arg name="odom_topic" value="/osa_airp1_odometry/odom"/>
+  </include>
+
+</launch>
+
